@@ -46,7 +46,7 @@
 - name: Updated BashRC
   copy: src=bashrc dest=/home/cumulus/.bashrc
 
-- name: Clone the Bootcamp Automation Repo
+- name: Clone the Test Drive Automation Repo
   git:
     repo: 'https://github.com/CumulusNetworks/cumulus-test-drive'
     dest: /home/cumulus/Test-Drive-Automation
