@@ -56,6 +56,11 @@
   apt:
     deb: http://ftp.us.debian.org/debian/pool/main/i/ifupdown2/ifupdown2_1.0~git20170314-1_all.deb
 
+- name: Install traceroute
+      apt:
+        name: traceroute
+        state: present
+        
 - name: Copy Default Bonding Configuration
   copy: src=bond.json dest=/etc/network/ifupdown2/policy.d/bond.json
 
