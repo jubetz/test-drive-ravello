@@ -48,9 +48,8 @@
 
 - name: Clone the Bootcamp Automation Repo
   git:
-    repo: 'https://github.com/CumulusNetworks/BootcampAutomation.git'
-    dest: /home/cumulus/BootcampAutomation
-    version: "{{ bootcamp_automation_branch }}"
+    repo: 'https://github.com/CumulusNetworks/cumulus-test-drive'
+    dest: /home/cumulus/Test-Drive-Automation
     clone: yes
     force: yes
   become: no
