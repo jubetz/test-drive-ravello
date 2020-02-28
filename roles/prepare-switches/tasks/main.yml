@@ -1,0 +1,12 @@
+- name: Detect CL Release
+  shell: cat /etc/lsb-release | grep DISTRIB_RELEASE | cut -d '=' -f2
+  register: cl_release
+  changed_when: false
+
+- debug: msg="CLrelease {{cl_release.stdout}}"
+
+- name: Check for Supported CL Version
+  assert:
+    that: "cl_release.stdout == desired_cl_release"
+    msg: "This Playbook is written for CL version {{desired_cl_release}} but the environment is using version {{cl_release.stdout}}"
+

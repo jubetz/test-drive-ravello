@@ -1,0 +1,120 @@
+- name: Detect CL Release
+  shell: cat /etc/lsb-release | grep DISTRIB_RELEASE | cut -d '=' -f2
+  register: cl_release
+  changed_when: false
+
+- name: Push OOB MOTD
+  copy: src=motd dest=/etc/motd
+
+- name: Push Interface Config
+  copy:
+    src: interfaces
+    dest: /etc/network/interfaces
+
+- name: Apply Interface Config
+  shell: ifreload -a
+
+- name: Push DNS
+  copy:
+    content: |
+      nameserver 8.8.8.8
+      nameserver 8.8.4.4
+    dest: /etc/resolv.conf
+
+- name: Detect Ansible Version
+  shell: 'if which ansible > /dev/null; then ansible --version | head -n1 | cut -d " " -f2; fi'
+  register: ansible_vers
+  changed_when: false
+
+- name: Make Sure Correct Ansible Version is Installed
+  debug:
+    msg: "This Bootcamp was built for {{desired_ansible_version}} but version {{ansible_vers.stdout}} is installed."
+
+- name: Installing Git default settings
+  copy: 
+    content: |
+      [push]
+          default = matching
+      [color]
+          ui = true
+      [credential]
+          helper = cache --timeout=3600
+      [core]
+          editor = nano
+    dest: /home/cumulus/.gitconfig
+
+- name: Updated BashRC
+  copy: src=bashrc dest=/home/cumulus/.bashrc
+
+- name: Clone the Bootcamp Automation Repo
+  git:
+    repo: 'https://github.com/CumulusNetworks/BootcampAutomation.git'
+    dest: /home/cumulus/BootcampAutomation
+    version: "{{ bootcamp_automation_branch }}"
+    clone: yes
+    force: yes
+  become: no
+
+- name: Make sure Ansible Directory Exists
+  file: path=/etc/ansible state=directory
+
+- name: Copying Ansible Hosts
+  copy: src=ansible_hosts dest=/etc/ansible/hosts
+
+- name: Copying Local DNS File (/etc/hosts)
+  copy: src=hosts dest=/etc/hosts
+
+- name: Enabling DNSMasq
+  service: name=dnsmasq state=started enabled=true
+
+- name: Copy dhcpd.conf
+  copy: src=dhcpd.conf dest=/etc/dhcp/dhcpd.conf
+
+- name: Copy dhcpd.hosts
+  copy: src=dhcpd.hosts dest=/etc/dhcp/dhcpd.hosts
+
+- name: Restart DHCP
+  service: name=dhcpd state=restarted
+
+- name: Push Vagrant Public Key
+  copy: src=id_rsa.pub dest=/var/www/html/authorized_keys
+
+- name: Push new HTML Index
+  copy: 
+    content: |
+      <html><h1>You've come to the oob-mgmt-server.</h1></html>
+    dest: /var/www/html/index.html
+
+- name: Push License.lic File
+  copy: 
+    content: |
+      this is a fake license
+    dest: /var/www/html/license.lic
+
+- name: Push Topology.dot script
+  copy: src=topology.dot dest=/var/www/html/topology.dot
+
+- name: Push ZTP script
+  copy: src=ztp.sh dest=/var/www/html/ztp_oob.sh
+
+- name: Setup NTP
+  copy: src=ntp.conf dest=/etc/ntp.conf
+
+- name: Restart NTP
+  service: name=ntp state=restarted
+
+- name: PAT outbound traffic
+  iptables:
+    table: nat
+    chain: POSTROUTING
+    jump: MASQUERADE
+
+- name: Save iptables rules
+  shell: iptables-save > /etc/iptables.up.rules
+
+- name: Load iptables rules on boot
+  copy:
+    src: iptables-up
+    dest: /etc/network/if-pre-up.d/iptables
+    owner: root
+    mode: '0755'

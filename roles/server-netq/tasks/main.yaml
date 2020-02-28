@@ -1,0 +1,29 @@
+- name: add repositories for NetQ/HostPack and OpenStack then update the apt cache
+  apt_key:
+    url:  https://apps3.cumulusnetworks.com/setup/cumulus-apps-deb.pubkey
+    state: present
+- apt_repository:
+    repo: deb [arch=amd64] https://apps3.cumulusnetworks.com/repos/deb xenial netq-1.4
+    filename: netq
+    state: present
+- apt:
+    update_cache: yes
+    name: cumulus-netq
+    state: latest
+- name: Start NetQ and Connect to the NetQ Telemetry Server
+  service:
+    name: rsyslog
+    state: restarted
+- service:
+    name: netqd
+    enabled: yes
+    state: restarted
+- copy:
+    src: files/netq.yml
+    dest: "/etc/netq/netq.yml"
+    owner: root
+    group: root
+    mode: "u=rw,o=r,g=r"
+- pause:
+    seconds: 5
+- shell: netq config restart agent

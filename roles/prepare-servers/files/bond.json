@@ -1,0 +1,14 @@
+{
+    "bond": {
+       "defaults": {
+           "bond-mode": "802.3ad",
+     "bond-xmit-hash-policy": "layer3+4",
+     "bond-lacp-rate": "fast",
+     "bond-miimon": "100",
+     "bond-min-links": "1",
+     "bond-use-carrier": "yes",
+     "bond-updelay": "0",
+     "bond-downdelay": "0"
+       }
+    }
+}

@@ -1,0 +1,27 @@
+- name: Work on OOB-Server
+  hosts: oob-server
+  become: yes
+  vars:
+    desired_ansible_version: "2.4.1.0"
+    bootcamp_automation_branch: "BC_ESR"
+  gather_facts: no
+  roles:
+  - prepare-oob-server
+
+- name: Work on the Switches
+  hosts: spine*:leaf*
+  become: yes
+  vars:
+   desired_cl_release: "3.7.0"
+  gather_facts: no
+  roles:
+  - prepare-switches
+
+- name: Work on the Servers
+  hosts: server*
+  become: yes
+  vars:
+   desired_ubuntu_release: "16.04"
+  gather_facts: no
+  roles:
+  - prepare-servers
