@@ -50,6 +50,7 @@
   git:
     repo: 'https://github.com/CumulusNetworks/cumulus-test-drive'
     dest: /home/cumulus/Test-Drive-Automation
+    version: master
     clone: yes
     force: yes
   become: no
